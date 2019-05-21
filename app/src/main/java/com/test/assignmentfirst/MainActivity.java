@@ -2,11 +2,14 @@ package com.test.assignmentfirst;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +25,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     List<Contacts> contact = new ArrayList();
+    BroadCastReceiver receiver;
     String TAG= "responce";
     RecyclerView rcv_list;
     ContactAdapter adapter;
@@ -38,7 +42,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setAdapter();
 
+        registerMyReceiver();
+
         runtimePermission();
+    }
+
+    private void registerMyReceiver() {
+        receiver = new BroadCastReceiver();
+        IntentFilter filter =  new IntentFilter();
+//        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 
     private void runtimePermission() {
@@ -70,8 +88,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    public void startService(){
+        Intent intent = new Intent(this, ContactService.class);
+        startService(intent);
+    }
+
     private void getContactList() {
         btn_permission.setVisibility(View.GONE);
+        startService();
         contact.clear();
         ContentResolver cr = getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
